@@ -1,3 +1,2 @@
 #!/bin/bash
 R -e "install.packages('areal', repos='https://cloud.r-project.org')"
-R -e "install.packages('giscoR', repos='https://cloud.r-project.org')"
