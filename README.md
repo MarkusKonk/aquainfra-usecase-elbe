@@ -103,6 +103,86 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=process_create_visualizations.R d2
 
 ---
 
+## Run the Workflow with MyBinder (or locally)
+
+Visit [https://mybinder.org/v2/gh/MarkusKonk/aquainfra-usecase-elbe/HEAD](https://mybinder.org/v2/gh/MarkusKonk/aquainfra-usecase-elbe/HEAD).
+
+Note: https://mybinder.org/ is just a test instance with limited resources. While step 1 and 3 succeed, step 2 is taking too much memory resulting in a connection error. Consequently, a more powerful MyBinder instance is needed. As an intermediate solution, just copy the files "example_output/weight_table.csv" "example_output//weight_table.rds" to the folder "out" created below.
+
+### Create directory
+Open Terminal
+
+```bash
+cd src/
+mkdir out
+````
+
+---
+
+### Step 1: Fetch NUTS and Eurostat Data
+
+```bash
+Rscript combine_eurostat_data.R "DE" "out/nuts3_pop_data.gpkg"
+```
+
+---
+
+### Step 2: Calculate Population Weights
+
+```bash
+Rscript weighting_functions.R "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif" "https://aquainfra-aau.a3s.fi/elbe/censusDE_catchSE.gpkg" "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif.vat.dbf" "out/weight_table.csv" "out/weight_table.rds"
+```
+
+---
+
+### Step 3: Clean Catchment Geometries
+
+```bash
+Rscript clean_catchment_geometry.R "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg" "out/catchment_cleaned.gpkg"
+```
+
+---
+
+### Step 4: Filter and Clip All Data to Analysis Extent
+
+```bash
+Rscript filter_clip_clean_extent.R "out/nuts3_pop_data.gpkg" "https://aquainfra-aau.a3s.fi/elbe/LAUpop2018DE.gpkg" "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg" "out/nuts3_filtered.gpkg" "out/lau_processed.gpkg" "out/analysis_extent.gpkg"
+```
+
+---
+
+### Step 5: Perform Dasymetric Refinement (Core Step)
+
+```bash
+Rscript process_dasymetric_refinement.R "out/nuts3_filtered.gpkg" "out/weight_table.rds" "out/analysis_extent.gpkg" "https://aquainfra-aau.a3s.fi/elbe/corDE_nutsSE.gpkg" "out/ancillary_data.gpkg"
+```
+
+---
+
+### Step 6: Interpolate Population to LAU
+
+```bash
+Rscript process_interpolate_lau.R "out/ancillary_data.gpkg" "out/lau_processed.gpkg" "out/lau_population_errors.gpkg"
+```
+
+---
+
+### Step 7: Interpolate Population to Subbasins
+
+```bash
+Rscript process_interpolate_subbasins.R "out/ancillary_data.gpkg" "out/catchment_cleaned.gpkg" "out/subbasin_population_density.gpkg"
+```
+
+---
+
+### Step 8: Create Final Visualizations
+
+```bash
+Rscript process_create_visualizations.R "out/weight_table.rds" "out/lau_population_errors.gpkg" "out/subbasin_population_density.gpkg" "out/visual_weight_table.csv" "out/visual_lau_error_map.html" "out/visual_subbasin_density_map.html"
+```
+
+---
+
 ## 💻 Platform Notes
 
 ### 🪟 Windows CMD / PowerShell
