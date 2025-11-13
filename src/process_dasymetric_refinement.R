@@ -17,6 +17,7 @@ library(stringr) # Added for string detection
 
 # --- 2. GLOBAL SETTINGS ---
 options(scipen = 100, digits = 4)
+options(timeout = 600)
 
 # --- 3. FUNCTION DEFINITION (Corrected) ---
 ################################################################################

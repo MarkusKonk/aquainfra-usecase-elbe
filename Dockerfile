@@ -30,6 +30,7 @@ RUN mamba env update -n base -f /app/environment.yml -y && \
 # 7. (FIX) Install the latest 'eurostat' from CRAN
 # This bypasses the conda-forge version issue and fixes the '410 Gone' API error.
 RUN /opt/conda/bin/R -e "install.packages('eurostat', repos='https://cloud.r-project.org/', dependencies=TRUE)"
+RUN /opt/conda/bin/R -e "install.packages('areal', repos='https://cloud.r-project.org/', dependencies=TRUE)"
 
 # 8. Copy R scripts (reusable functions) into the standard D2K source folder
 COPY src/ /app/src/
