@@ -1,0 +1,48 @@
+{
+    "version": "0.1.0",
+    "id": "clean-catchment-geometry",
+    "use_case": "Elbe",
+    "title": {
+        "en": "clean-catchment-geometry...TITLE"
+    },
+    "description": {
+        "en": "clean-catchment-geometry...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "inputFile1_gpkg": {
+            "title": "inputFile1_gpkg TITLE",
+            "description": "inputFile1_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "catchment_cleaned": {
+            "title": "catchment_cleaned gpkg TITLE",
+            "description": "catchment_cleaned gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            }
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}

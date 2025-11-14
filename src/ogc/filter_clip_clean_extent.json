@@ -1,0 +1,86 @@
+{
+    "version": "0.1.0",
+    "id": "filter-clip-clean-extent",
+    "use_case": "Elbe",
+    "title": {
+        "en": "filter-clip-clean-extent...TITLE"
+    },
+    "description": {
+        "en": "filter-clip-clean-extent...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "inputFile1_gpkg": {
+            "title": "inputFile1_gpkg TITLE",
+            "description": "inputFile1_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile2_gpkg": {
+            "title": "inputFile2_gpkg TITLE",
+            "description": "inputFile2_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile3_gpkg": {
+            "title": "inputFile3_gpkg TITLE",
+            "description": "inputFile3_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "nuts3_filtered": {
+            "title": "nuts3_filtered gpkg TITLE",
+            "description": "nuts3_filtered gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3v"
+            }
+        },
+        "lau_processed": {
+            "title": "lau_processed gpkg TITLE",
+            "description": "lau_processed gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            }
+        },
+        "analysis_extent": {
+            "title": "analysis_extent gpkg TITLE",
+            "description": "analysis_extent gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            }
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}

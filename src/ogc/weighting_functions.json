@@ -1,0 +1,78 @@
+{
+    "version": "0.1.0",
+    "id": "weighting-functions",
+    "use_case": "Elbe",
+    "title": {
+        "en": "weighting-functions...TITLE"
+    },
+    "description": {
+        "en": "weighting-functions...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "inputFile1_tif": {
+            "title": "inputFile1_tif TITLE",
+            "description": "inputFile1_tif DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "image/tiff"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile2_gpkg": {
+            "title": "inputFile2_gpkg TITLE",
+            "description": "inputFile2_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile3_dbf": {
+            "title": "inputFile3_dbf TITLE",
+            "description": "inputFile3_dbf DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/vnd.dbf"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "weight_table_csv": {
+            "title": "weight_table csv TITLE",
+            "description": "weight_table csv DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "text/csv"
+            }
+        },
+        "weight_table_rds": {
+            "title": "weight_table rds TITLE",
+            "description": "weight_table rds DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-rds"
+            }
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}

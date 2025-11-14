@@ -1,0 +1,47 @@
+{
+    "version": "0.1.0",
+    "id": "combine-eurostat-data",
+    "use_case": "Elbe",
+    "title": {
+        "en": "combine-eurostat-data...TITLE"
+    },
+    "description": {
+        "en": "combine-eurostat-data...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "country_code": {
+            "title": "country_code TITLE",
+            "description": "country_code DESCRIPTION",
+            "schema": {
+                "type": "string"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "nuts3_pop_data": {
+            "title": "nuts3_pop_data gpkg TITLE",
+            "description": "nuts3_pop_data gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            }
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}

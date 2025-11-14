@@ -1,0 +1,81 @@
+{
+    "version": "0.1.0",
+    "id": "process-dasymetric-refinement",
+    "use_case": "Elbe",
+    "title": {
+        "en": "process-dasymetric-refinement...TITLE"
+    },
+    "description": {
+        "en": "process-dasymetric-refinement...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "inputFile1_gpkg": {
+            "title": "inputFile1_gpkg TITLE",
+            "description": "inputFile1_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile2_rds": {
+            "title": "inputFile2_rds TITLE",
+            "description": "inputFile2_rds DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-rds"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile3_gpkg": {
+            "title": "inputFile3_gpkg TITLE",
+            "description": "inputFile3_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile4_gpkg": {
+            "title": "inputFile4_gpkg TITLE",
+            "description": "inputFile4_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "ancillary_data": {
+            "title": "ancillary_data gpkg TITLE",
+            "description": "ancillary_data gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3v"
+            }
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}

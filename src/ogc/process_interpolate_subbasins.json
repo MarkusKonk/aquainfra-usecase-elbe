@@ -1,0 +1,59 @@
+{
+    "version": "0.1.0",
+    "id": "process-interpolate-subbasins",
+    "use_case": "Elbe",
+    "title": {
+        "en": "process-interpolate-subbasins...TITLE"
+    },
+    "description": {
+        "en": "process-interpolate-subbasins...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "inputFile1_gpkg": {
+            "title": "inputFile1_gpkg TITLE",
+            "description": "inputFile1_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile2_gpkg": {
+            "title": "inputFile2_gpkg TITLE",
+            "description": "inputFile2_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "subbasin_population_density": {
+            "title": "subbasin_population_density gpkg TITLE",
+            "description": "subbasin_population_density gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3v"
+            }
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}

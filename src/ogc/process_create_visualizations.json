@@ -1,0 +1,86 @@
+{
+    "version": "0.1.0",
+    "id": "process-create-visualizations",
+    "use_case": "Elbe",
+    "title": {
+        "en": "process-create-visualizations...TITLE"
+    },
+    "description": {
+        "en": "process-create-visualizations...DESCRIPTION"
+    },
+    "jobControlOptions": ["sync-execute", "async-execute"],
+    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "links": [{
+        "type": "text/html",
+        "rel": "about",
+        "title": "information",
+        "href": "https://example.org/process",
+        "hreflang": "en-US"
+    }],
+    "inputs": {
+        "inputFile1_rds": {
+            "title": "inputFile1_rds TITLE",
+            "description": "inputFile1_rds DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-rds"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile2_gpkg": {
+            "title": "inputFile2_gpkg TITLE",
+            "description": "inputFile2_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "inputFile3_gpkg": {
+            "title": "inputFile3_gpkg TITLE",
+            "description": "inputFile3_gpkg DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "application/x-sqlite3"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        }
+    },
+    "outputs": {
+        "visual_weight_table": {
+            "title": "visual_weight_table csv TITLE",
+            "description": "visual_weight_table csv DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "text/csv"
+            }
+        },
+        "visual_lau_error_map": {
+            "title": "visual_lau_error_map html TITLE",
+            "description": "visual_lau_error_map html DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "text/html"
+            }
+        },
+        "visual_subbasin_density_map": {
+            "title": "visual_subbasin_density_map html TITLE",
+            "description": "visual_subbasin_density_map html DESCRIPTION",
+            "schema": {
+                "type": "object",
+                "contentMediaType": "text/html"
+            }  
+        }
+    },
+    "example": {
+        "inputs": {
+            "country_code": "DE"
+        }
+    }
+}
