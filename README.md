@@ -34,7 +34,7 @@ Make sure the folder exists before running.
 
 ### Build the Docker Image
 ```bash
-docker build -t d2k-toolbox .
+docker build -t aquainfra-elbe-usecase-image .
 ````
 
 ---
@@ -42,7 +42,7 @@ docker build -t d2k-toolbox .
 ### Step 1: Fetch NUTS and Eurostat Data
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R d2k-toolbox "DE" "/out/nuts3_pop_data.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R aquainfra-elbe-usecase-image "DE" "/out/nuts3_pop_data.gpkg"
 ```
 
 ---
@@ -50,7 +50,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R d2k-toolbo
 ### Step 2: Calculate Population Weights
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=weighting_functions.R d2k-toolbox "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif" "https://aquainfra-aau.a3s.fi/elbe/censusDE_catchSE.gpkg" "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif.vat.dbf" "/out/weight_table.csv" "/out/weight_table.rds"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=weighting_functions.R aquainfra-elbe-usecase-image "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif" "https://aquainfra-aau.a3s.fi/elbe/censusDE_catchSE.gpkg" "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif.vat.dbf" "/out/weight_table.csv" "/out/weight_table.rds"
 ```
 
 ---
@@ -58,7 +58,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=weighting_functions.R d2k-toolbox 
 ### Step 3: Clean Catchment Geometries
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=clean_catchment_geometry.R d2k-toolbox "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg" "/out/catchment_cleaned.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=clean_catchment_geometry.R aquainfra-elbe-usecase-image "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg" "/out/catchment_cleaned.gpkg"
 ```
 
 ---
@@ -66,7 +66,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=clean_catchment_geometry.R d2k-too
 ### Step 4: Filter and Clip All Data to Analysis Extent
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=filter_clip_clean_extent.R d2k-toolbox "/out/nuts3_pop_data.gpkg" "https://aquainfra-aau.a3s.fi/elbe/LAUpop2018DE.gpkg" "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg" "/out/nuts3_filtered.gpkg" "/out/lau_processed.gpkg" "/out/analysis_extent.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=filter_clip_clean_extent.R aquainfra-elbe-usecase-image "/out/nuts3_pop_data.gpkg" "https://aquainfra-aau.a3s.fi/elbe/LAUpop2018DE.gpkg" "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg" "/out/nuts3_filtered.gpkg" "/out/lau_processed.gpkg" "/out/analysis_extent.gpkg"
 ```
 
 ---
@@ -74,7 +74,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=filter_clip_clean_extent.R d2k-too
 ### Step 5: Perform Dasymetric Refinement (Core Step)
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=process_dasymetric_refinement.R d2k-toolbox "/out/nuts3_filtered.gpkg" "/out/weight_table.rds" "/out/analysis_extent.gpkg" "https://aquainfra-aau.a3s.fi/elbe/corDE_nutsSE.gpkg" "/out/ancillary_data.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=process_dasymetric_refinement.R aquainfra-elbe-usecase-image "/out/nuts3_filtered.gpkg" "/out/weight_table.rds" "/out/analysis_extent.gpkg" "https://aquainfra-aau.a3s.fi/elbe/corDE_nutsSE.gpkg" "/out/ancillary_data.gpkg"
 ```
 
 ---
@@ -82,7 +82,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=process_dasymetric_refinement.R d2
 ### Step 6: Interpolate Population to LAU
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=process_interpolate_lau.R d2k-toolbox "/out/ancillary_data.gpkg" "/out/lau_processed.gpkg" "/out/lau_population_errors.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=process_interpolate_lau.R aquainfra-elbe-usecase-image "/out/ancillary_data.gpkg" "/out/lau_processed.gpkg" "/out/lau_population_errors.gpkg"
 ```
 
 ---
@@ -90,7 +90,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=process_interpolate_lau.R d2k-tool
 ### Step 7: Interpolate Population to Subbasins
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=process_interpolate_subbasins.R d2k-toolbox "/out/ancillary_data.gpkg" "/out/catchment_cleaned.gpkg" "/out/subbasin_population_density.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=process_interpolate_subbasins.R aquainfra-elbe-usecase-image "/out/ancillary_data.gpkg" "/out/catchment_cleaned.gpkg" "/out/subbasin_population_density.gpkg"
 ```
 
 ---
@@ -98,7 +98,7 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=process_interpolate_subbasins.R d2
 ### Step 8: Create Final Visualizations
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=process_create_visualizations.R d2k-toolbox "/out/weight_table.rds" "/out/lau_population_errors.gpkg" "/out/subbasin_population_density.gpkg" "/out/visual_weight_table.csv" "/out/visual_lau_error_map.html" "/out/visual_subbasin_density_map.html"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=process_create_visualizations.R aquainfra-elbe-usecase-image "/out/weight_table.rds" "/out/lau_population_errors.gpkg" "/out/subbasin_population_density.gpkg" "/out/visual_weight_table.csv" "/out/visual_lau_error_map.html" "/out/visual_subbasin_density_map.html"
 ```
 
 ---
@@ -193,7 +193,7 @@ Rscript process_create_visualizations.R "out/weight_table.rds" "out/lau_populati
 
   ```bash
   cd "D:\05.HSBO\AquaInfra\01. Gulf of Riga\Code\Elbe_Codes\New_Elbe_Docker"
-  docker build -t d2k-toolbox .
+  docker build -t aquainfra-elbe-usecase-image .
   ```
 
 ### 🐧 Linux / macOS
@@ -201,7 +201,7 @@ Rscript process_create_visualizations.R "out/weight_table.rds" "out/lau_populati
 Use the same commands, or replace paths with full directories if needed:
 
 ```bash
-docker run -it --rm -v $(pwd)/out:/out -e R_SCRIPT=combine_eurostat_data.R d2k-toolbox "DE" "/out/nuts3_pop_data.gpkg"
+docker run -it --rm -v $(pwd)/out:/out -e R_SCRIPT=combine_eurostat_data.R aquainfra-elbe-usecase-image "DE" "/out/nuts3_pop_data.gpkg"
 ```
 
 ---
@@ -211,7 +211,7 @@ docker run -it --rm -v $(pwd)/out:/out -e R_SCRIPT=combine_eurostat_data.R d2k-t
 Before running the full workflow, verify that your **Docker image**, **R environment**, and **GDAL bindings** work correctly.
 
 ```bash
-docker run -it --rm d2k-toolbox R -e "library(sf); p <- st_point(c(10, 50)); s <- st_sfc(p, crs=4326); print(st_transform(s, 3035))"
+docker run -it --rm aquainfra-elbe-usecase-image R -e "library(sf); p <- st_point(c(10, 50)); s <- st_sfc(p, crs=4326); print(st_transform(s, 3035))"
 ```
 
 Expected output (example):
@@ -244,14 +244,14 @@ This repository is released under the **Apache License 2.0**.
 
 | Issue | Cause | Solution |
 |-------|--------|-----------|
-| **exec /app/entrypoint.sh: no such file or directory** | 1. You created `entrypoint.sh` after building the image. <br> 2. (On Windows) Your editor used Windows (`\r\n`) line endings. | Rebuild the image (`docker build -t d2k-toolbox .`). The Dockerfile automatically copies the new file and fixes line endings. |
+| **exec /app/entrypoint.sh: no such file or directory** | 1. You created `entrypoint.sh` after building the image. <br> 2. (On Windows) Your editor used Windows (`\r\n`) line endings. | Rebuild the image (`docker build -t aquainfra-elbe-usecase-image .`). The Dockerfile automatically copies the new file and fixes line endings. |
 | **“URL using bad/illegal format” or “cannot open URL”** | The command is missing the `https://` prefix or has extra quotes. | Use plain URLs only with `https://`, e.g., `https://aquainfra-aau.a3s.fi/elbe/...`. |
 | **File not found (e.g., `/out/...` missing)** | The `out` directory is not mounted or doesn’t exist locally. | Run `mkdir out` in your project folder before starting Docker. |
 | **Eurostat download fails (Error 410 Gone)** | The Eurostat R package is outdated and using a dead API link. | Ensure you have the latest Dockerfile and `.binder/environment.yml`, then rebuild the image (`docker build ...`). |
 | **“object not found” in R logs** | The previous step failed, so the input file for the current step was never created. | Check the log of the previous command. Fix the error and re-run that step. |
 | **A step fails with a “corrupt file” or “empty geometry” error** | A previous failed run left a partial or empty file in `./out`. | Delete all files in `./out` (e.g., `rm -rf ./out/*`) and run the workflow again from Step 1. |
 | **Final maps are empty or show wrong data on hover (e.g., 44733.33%)** | A bug in the R visualization or calculation scripts. | 1. Ensure your `src` scripts are up to date. <br> 2. Rebuild the image (`docker build ...`). <br> 3. Re-run the workflow from Step 6. |
-| **Changes to Dockerfile or R scripts don’t seem to work** | Docker is using old cached layers. | Force a clean rebuild:<br>`docker builder prune -af`<br>`docker rmi d2k-toolbox`<br>`docker build -t d2k-toolbox .` |
+| **Changes to Dockerfile or R scripts don’t seem to work** | Docker is using old cached layers. | Force a clean rebuild:<br>`docker builder prune -af`<br>`docker rmi aquainfra-elbe-usecase-image`<br>`docker build -t aquainfra-elbe-usecase-image .` |
 | **Permission denied on Windows** | Docker can’t access your drive. | Enable drive sharing in *Docker Desktop → Settings → Resources → File Sharing*. |
 | **Performance slow or process killed** | Insufficient memory for GDAL or raster ops. | Increase Docker Desktop memory to ≥ 8 GB (*Settings → Resources → Memory*). |
 
@@ -268,7 +268,7 @@ You can capture Docker logs, run all workflow steps at once, or export your comm
 To save both normal output and error messages to a file, use `*>&1` redirection:
 
 ```powershell
-docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R d2k-toolbox "DE" "/out/nuts3_pop_data.gpkg" *>&1 > step1_log.txt
+docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R aquainfra-elbe-usecase-image "DE" "/out/nuts3_pop_data.gpkg" *>&1 > step1_log.txt
 ````
 
 This stores all console messages from Step 1 in `step1_log.txt`.
