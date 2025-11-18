@@ -104,7 +104,7 @@ def run_docker_container(
     script = 'process_dasymetric_refinement.R'
 
     docker_command = [
-        "sudo", "docker", "run", "--rm", "--name", container_name,
+        "docker", "run", "--rm", "--name", container_name,
         "-v", f"{local_out}:{container_out}",
         "-e", f"R_SCRIPT={script}",  # Set the R_SCRIPT environment variable
         image_name,
