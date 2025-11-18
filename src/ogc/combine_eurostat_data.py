@@ -24,7 +24,7 @@ class CombineEurostatDataProcessor(BaseProcessor):
         return f'<CombineEurostatDataProcessor> {self.name}'
 
     def execute(self, data, outputs=None):
-        config_file_path = os.environ.get('DAUGAVA_CONFIG_FILE', "./pygeoapi/process/config.json")
+        config_file_path = os.environ.get('DAUGAVA_CONFIG_FILE', "./config.json")
         with open(config_file_path, 'r') as configFile:
             configJSON = json.load(configFile)
 
@@ -33,16 +33,20 @@ class CombineEurostatDataProcessor(BaseProcessor):
 
         # User inputs
         in_country_code = data.get('country_code')
+        in_year = data.get('year')
 
         # Check user inputs
         if in_country_code is None:
             raise ProcessorExecuteError('Missing parameter "inputFile_tif". Please provide a inputFile_tif.')
+        if in_year is None:
+            raise ProcessorExecuteError('Missing parameter "year". Please provide a year.')
 
         # Where to store output data
         downloadfilename = 'nuts3_pop_data-%s.gpkg' % self.my_job_id
 
         returncode, stdout, stderr = run_docker_container(
             in_country_code,
+            in_year,
             download_dir, 
             downloadfilename
         )
@@ -74,6 +78,7 @@ class CombineEurostatDataProcessor(BaseProcessor):
 
 def run_docker_container(
         in_country_code,
+        in_year,
         download_dir, 
         downloadfilename
     ):
@@ -94,6 +99,7 @@ def run_docker_container(
         "-e", f"R_SCRIPT={script}",
         image_name,
         in_country_code,
+        in_year,
         f"{container_out}/{downloadfilename}"
     ]
 

@@ -27,6 +27,16 @@
             "minOccurs": 1,
             "maxOccurs": 1,
             "keywords": []
+        },
+        "year": {
+            "title": "year TITLE",
+            "description": "year DESCRIPTION",
+            "schema": {
+                "type": "string"
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
         }
     },
     "outputs": {

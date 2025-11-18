@@ -49,21 +49,25 @@ combine_eurostat_data <- function(nuts3_all_sf, poptable_df, country_code = "DE"
 ################################################################################
 
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 2) {
+if (length(args) != 3) {
   stop("Usage: Rscript src/combine_eurostat_data.R <country_code> <output_gpkg_path>", call. = FALSE)
 }
 
 param_country_code <- args[1]
-output_path        <- args[2]
+param_year <- args[2]
+output_path        <- args[3]
 
-message(paste("D2K Wrapper Started for country:", param_country_code))
+message(paste(
+  "D2K Wrapper Started for country:", param_country_code,
+  "and year:", param_year
+))
 message(paste("Output will be saved to:", output_path))
 
 tryCatch({
   message("Fetching NUTS3 boundaries from giscoR...")
   # Fetches NUTS3 data for the latest available year (2021) in EPSG 3035 projection
   nuts3_all <- giscoR::gisco_get_nuts(
-    year = "2021",
+    year = param_year,
     epsg = "3035",
     resolution = "01",
     spatialtype = "RG",
