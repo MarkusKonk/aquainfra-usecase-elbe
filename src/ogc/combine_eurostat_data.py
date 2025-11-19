@@ -67,15 +67,18 @@ class CombineEurostatDataProcessor(BaseProcessor):
 
         # Where to store output data
         downloadfilename = 'nuts3_pop_data-%s.gpkg' % self.my_job_id
+        downloadfilepath = f'{output_dir}/{downloadfilename}'
 
+        # Assemble args for script:
+        script_args = [in_country_code, in_year, downloadfilepath]
+
+        # Run docker container:
         returncode, stdout, stderr, user_err_msg = run_docker_container(
             self.docker_executable,
             self.image_name,
             self.script_name,
-            in_country_code,
-            in_year,
             output_dir,
-            downloadfilename
+            script_args
         )
 
         if not returncode == 0:
@@ -105,10 +108,8 @@ def run_docker_container(
         docker_executable,
         image_name,
         script,
-        in_country_code,
-        in_year,
         local_out,
-        downloadfilename
+        script_args
     ):
 
     LOGGER.debug('Prepare running docker container (image: %s)' % image_name)
@@ -117,15 +118,26 @@ def run_docker_container(
     # Mounting
     container_out = '/out'
 
+    # Replace the host path with the container path in all script args:
+    script_args_sanitized = []
+    for arg in script_args:
+        LOGGER.debug('Verifying arg: %s' % arg)
+        if local_out in arg:
+            newarg = arg.replace(local_out, container_out)
+            LOGGER.debug(f'Replaced {arg} by {newarg}')
+        else:
+            newarg = arg
+        script_args_sanitized.append(newarg)
+
+    # Assemble docker command:
     docker_command = [
         docker_executable, "run", "--rm", "--name", container_name,
         "-v", f"{local_out}:{container_out}",
         "-e", f"R_SCRIPT={script}",
-        image_name,
-        in_country_code,
-        in_year,
-        f"{container_out}/{downloadfilename}"
+        image_name
     ]
+    docker_command = docker_command + script_args_sanitized
+    LOGGER.debug('Docker command: %s' % docker_command)
 
     # Run container
     try:
