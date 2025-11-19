@@ -3,6 +3,9 @@ import subprocess
 import json
 import os
 from pygeoapi.process.base import BaseProcessor, ProcessorExecuteError
+# how to import python modules containing a hyphen:
+import importlib
+docker_utils = importlib.import_module("pygeoapi.process.aquainfra-usecase-elbe.src.ogc.docker_utils")
 
 LOGGER = logging.getLogger(__name__)
 
@@ -15,7 +18,10 @@ class FilterClipCleanExtentProcessor(BaseProcessor):
     def __init__(self, processor_def):
         super().__init__(processor_def, PROCESS_METADATA)
         self.supports_outputs = True
+        self.process_id = self.metadata["id"]
         self.my_job_id = 'nothing-yet'
+        self.image_name = 'aquainfra-elbe-usecase-image:20251119'
+        self.script_name = 'filter_clip_clean_extent.R'
 
     def set_job_id(self, job_id: str):
         self.my_job_id = job_id
@@ -24,12 +30,17 @@ class FilterClipCleanExtentProcessor(BaseProcessor):
         return f'<FilterClipCleanExtentProcessor> {self.name}'
 
     def execute(self, data, outputs=None):
-        config_file_path = os.environ.get('DAUGAVA_CONFIG_FILE', "./config.json")
+        config_file_path = os.environ.get('AQUAINFRA_CONFIG_FILE', "./config.json")
         with open(config_file_path, 'r') as configFile:
             configJSON = json.load(configFile)
+            self.docker_executable = configJSON["docker_executable"]
+            self.download_dir = configJSON["download_dir"].rstrip('/')
+            self.download_url = configJSON["download_url"].rstrip('/')
 
-        download_dir = configJSON["download_dir"]
-        own_url = configJSON["own_url"]
+        # Where to store output data (will be mounted read-write into container):
+        output_dir = f'{self.download_dir}/out/{self.process_id}/job_{self.my_job_id}'
+        output_url = f'{self.download_url}/out/{self.process_id}/job_{self.my_job_id}'
+        os.makedirs(output_dir, exist_ok=True)
 
         # User inputs
         in_inputFile1_gpkg = data.get('inputFile1_gpkg')
@@ -48,30 +59,38 @@ class FilterClipCleanExtentProcessor(BaseProcessor):
         downloadfilename1 = 'nuts3_filtered-%s.gpkg' % self.my_job_id
         downloadfilename2 = 'lau_processed-%s.gpkg' % self.my_job_id
         downloadfilename3 = 'analysis_extent-%s.gpkg' % self.my_job_id
+        downloadfilepath1 = f'{output_dir}/{downloadfilename1}'
+        downloadfilepath2 = f'{output_dir}/{downloadfilename2}'
+        downloadfilepath3 = f'{output_dir}/{downloadfilename3}'
+        downloadlink1     = f'{output_url}/{downloadfilename1}'
+        downloadlink2     = f'{output_url}/{downloadfilename2}'
+        downloadlink3     = f'{output_url}/{downloadfilename3}'
 
-        returncode, stdout, stderr = run_docker_container(
+        # Assemble args for script:
+        script_args = [
             in_inputFile1_gpkg,
             in_inputFile2_gpkg,
             in_inputFile3_gpkg,
-            download_dir, 
-            downloadfilename1,
-            downloadfilename2,
-            downloadfilename3
+            downloadfilepath1,
+            downloadfilepath2,
+            downloadfilepath3
+        ]
+
+        # Run docker container:
+        returncode, stdout, stderr, user_err_msg = docker_utils.run_docker_container(
+            self.docker_executable,
+            self.image_name,
+            self.script_name,
+            output_dir,
+            script_args
         )
 
         if not returncode == 0:
-            err_msg = 'Running docker container failed.'
-            for line in stderr.split('\n'):
-                if line.startswith('Error'):
-                    err_msg = 'Running docker container failed: %s' % (line)
+            user_err_msg = "no message" if len(user_err_msg) == 0 else user_err_msg
+            err_msg = 'Running docker container failed: %s' % user_err_msg
             raise ProcessorExecuteError(user_msg = err_msg)
 
         else:
-            # Create download link:
-            downloadlink1 = own_url.rstrip('/')+os.sep+downloadfilename1
-            downloadlink2 = own_url.rstrip('/')+os.sep+downloadfilename2
-            downloadlink3 = own_url.rstrip('/')+os.sep+downloadfilename3
-
             # Return link to file:
             response_object = {
                 "outputs": {
@@ -94,47 +113,3 @@ class FilterClipCleanExtentProcessor(BaseProcessor):
             }
 
             return 'application/json', response_object
-
-
-def run_docker_container(
-        in_inputFile1_gpkg,
-        in_inputFile2_gpkg,
-        in_inputFile3_gpkg,
-        download_dir, 
-        downloadfilename1,
-        downloadfilename2,
-        downloadfilename3
-    ):
-    LOGGER.debug('Start running docker container')
-    container_name = f'aquainfra-elbe-usecase-image_{os.urandom(5).hex()}'
-    image_name = 'aquainfra-elbe-usecase-image'
-
-    # Mounting
-    container_out = '/out'
-    local_out = os.path.join(download_dir, "out")
-    os.makedirs(local_out, exist_ok=True)
-
-    script = 'filter_clip_clean_extent.R'
-
-    docker_command = [
-        "docker", "run", "--rm", "--name", container_name,
-        "-v", f"{local_out}:{container_out}",
-        "-e", f"R_SCRIPT={script}",
-        image_name,
-        in_inputFile1_gpkg,
-        in_inputFile2_gpkg,
-        in_inputFile3_gpkg,
-        f"{container_out}/{downloadfilename1}",
-        f"{container_out}/{downloadfilename2}",
-        f"{container_out}/{downloadfilename3}"
-    ]
-    
-    # Run container
-    try:
-        result = subprocess.run(docker_command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout = result.stdout.decode()
-        stderr = result.stderr.decode()
-        return result.returncode, stdout, stderr
-
-    except subprocess.CalledProcessError as e:
-        return e.returncode, e.stdout.decode(), e.stderr.decode()
