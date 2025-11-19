@@ -10,11 +10,24 @@ script_title_and_path = __file__
 metadata_title_and_path = script_title_and_path.replace('.py', '.json')
 PROCESS_METADATA = json.load(open(metadata_title_and_path))
 
+'''
+curl -X POST https://${PYSERVER}/processes/combine-eurostat-data/execution \
+  --header 'Prefer: respond-async;return=representation' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "inputs": {
+      "country_code": "DE",
+      "year": "2021"
+    }
+}'
+'''
+
 class CombineEurostatDataProcessor(BaseProcessor):
 
     def __init__(self, processor_def):
         super().__init__(processor_def, PROCESS_METADATA)
         self.supports_outputs = True
+        self.process_id = self.metadata["id"]
         self.my_job_id = 'nothing-yet'
         self.image_name = 'aquainfra-elbe-usecase-image:20251119'
 
@@ -28,9 +41,13 @@ class CombineEurostatDataProcessor(BaseProcessor):
         config_file_path = os.environ.get('DAUGAVA_CONFIG_FILE', "./config.json")
         with open(config_file_path, 'r') as configFile:
             configJSON = json.load(configFile)
+            self.download_dir = configJSON["download_dir"].rstrip('/')
+            self.download_url = configJSON["download_url"].rstrip('/')
 
-        download_dir = configJSON["download_dir"]
-        own_url = configJSON["own_url"]
+        # Where to store output data (will be mounted read-write into container):
+        output_dir = f'{self.download_dir}/out/{self.process_id}/job_{self.my_job_id}'
+        output_url = f'{self.download_url}/out/{self.process_id}/job_{self.my_job_id}'
+        os.makedirs(output_dir, exist_ok=True)
 
         # User inputs
         in_country_code = data.get('country_code')
@@ -49,7 +66,7 @@ class CombineEurostatDataProcessor(BaseProcessor):
             self.image_name,
             in_country_code,
             in_year,
-            download_dir, 
+            output_dir,
             downloadfilename
         )
 
@@ -62,7 +79,7 @@ class CombineEurostatDataProcessor(BaseProcessor):
 
         else:
             # Create download link:
-            downloadlink = own_url.rstrip('/')+os.sep+downloadfilename
+            downloadlink = output_url.rstrip('/')+os.sep+downloadfilename
 
             # Return link to file:
             response_object = {
@@ -82,7 +99,7 @@ def run_docker_container(
         image_name,
         in_country_code,
         in_year,
-        download_dir, 
+        local_out,
         downloadfilename
     ):
 
@@ -91,8 +108,6 @@ def run_docker_container(
 
     # Mounting
     container_out = '/out'
-    local_out = os.path.join(download_dir, "out")
-    os.makedirs(local_out, exist_ok=True)
 
     script = 'combine_eurostat_data.R'
 
