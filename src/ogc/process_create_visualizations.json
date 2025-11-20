@@ -3,10 +3,10 @@
     "id": "process-create-visualizations",
     "use_case": "Elbe",
     "title": {
-        "en": "process-create-visualizations...TITLE"
+        "en": "Visualising final outputs of dasymetric refinement process."
     },
-    "description": {
-        "en": "process-create-visualizations...DESCRIPTION"
+    "description"{
+        "en": "Visualising final urban significant CLC-class specific dasymetric refinement input weights in table (output 1), error map of dasymetric refinement process at LAU (Local Areal Unit) level (output 2), and estimated human population density for target zones (output 3)."
     },
     "jobControlOptions": ["sync-execute", "async-execute"],
     "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
@@ -19,8 +19,8 @@
     }],
     "inputs": {
         "inputFile1_rds": {
-            "title": "inputFile1_rds TITLE",
-            "description": "inputFile1_rds DESCRIPTION",
+            "title": "Weight table as RDS",
+            "description": "Weights for each significant urban CLC class stored as RDS. It should contain an integer column named 'CODE_18' with the significant CLC category codes and a numeric column named 'percent'.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/x-rds"
@@ -30,8 +30,8 @@
             "keywords": []
         },
         "inputFile2_gpkg": {
-            "title": "inputFile2_gpkg TITLE",
-            "description": "inputFile2_gpkg DESCRIPTION",
+            "title": "Control data: LAU regions with estimated annual human population.",
+            "description": "LAU regions stored as geopackage with estimated annual human population based on area-weighted ancillary data and its difference to observed latest annual human population, indicating the precision of the dasymetric refinement process for modelling human population finer in scale.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/geopackage+sqlite3"
@@ -41,8 +41,8 @@
             "keywords": []
         },
         "inputFile3_gpkg": {
-            "title": "inputFile3_gpkg TITLE",
-            "description": "inputFile3_gpkg DESCRIPTION",
+            "title": "Target data with estimated annual human population.",
+            "description": "Target data (e.g. Ecrins 2012 river subcatchments) stored as geopackage with estimated annual human population based on area-weighted ancillary data and dasymetric refinement of NUTS3 level human population.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/geopackage+sqlite3"
@@ -54,24 +54,24 @@
     },
     "outputs": {
         "visual_weight_table": {
-            "title": "visual_weight_table csv TITLE",
-            "description": "visual_weight_table csv DESCRIPTION",
+            "title": "Weight table as CSV",
+            "description": "Weights for each significant urban CLC class stored as CSV. It contains a column named 'CODE_18' with the significant CLC category codes and a column named 'percent' with relative weights for estimating human population.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "text/csv"
             }
         },
         "visual_lau_error_map": {
-            "title": "visual_lau_error_map html TITLE",
-            "description": "visual_lau_error_map html DESCRIPTION",
+            "title": "Map showing error percentages of estimated versus observed human population for LAU regions.",
+            "description": "Leaflet self-contained HTML map showing error percentages of estimated versus observed human population for LAU (Local Area Unit) regions.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "text/html"
             }
         },
         "visual_subbasin_density_map": {
-            "title": "visual_subbasin_density_map html TITLE",
-            "description": "visual_subbasin_density_map html DESCRIPTION",
+            "title": "Map showing estimated annual human population densities for target regions.",
+            "description": "Leaflet self-contained HTML map showing estimated annual human population densities for target regions.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "text/html"
