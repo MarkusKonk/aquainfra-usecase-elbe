@@ -3,10 +3,10 @@
     "id": "weighting-functions",
     "use_case": "Elbe",
     "title": {
-        "en": "weighting-functions...TITLE"
+        "en": "Calculating human population density-derived weights for CORINE CLC classes."
     },
     "description": {
-        "en": "weighting-functions...DESCRIPTION"
+        "en": "Mapping CORINE CLC raster to Eurostat 2021 Census Grid to calculate human population density-derived weights for significant urban CLC classes."
     },
     "jobControlOptions": ["sync-execute", "async-execute"],
     "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
@@ -19,8 +19,8 @@
     }],
     "inputs": {
         "inputFile1_tif": {
-            "title": "inputFile1_tif TITLE",
-            "description": "inputFile1_tif DESCRIPTION",
+            "title": "CORINE CLC Land Cover raster for analysis area in focus",
+            "description": "CORINE CLC Land Cover raster stored as TIF and for chosen analysis year (e.g. for year 2018) and e.g. extent in 100m2 cells. It should cover the analysis area in focus and have same coordinate system as the Census Grid input.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "image/tiff"
@@ -30,8 +30,8 @@
             "keywords": []
         },
         "inputFile2_gpkg": {
-            "title": "inputFile2_gpkg TITLE",
-            "description": "inputFile2_gpkg DESCRIPTION",
+            "title": "Eurostat 2021 Census Grid in 1 km2 resolution",
+            "description": "Eurostat 2021 Census Grid in 1 km2 resoultion as geopackage. It should cover the analysis area in focus and have same coordinate system as the Corine CLC raster input.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/geopackage+sqlite3"
@@ -41,8 +41,8 @@
             "keywords": []
         },
         "inputFile3_dbf": {
-            "title": "inputFile3_dbf TITLE",
-            "description": "inputFile3_dbf DESCRIPTION",
+            "title": "CORINE CLC class legend as DBF",
+            "description": "CORINE CLC class legend stored as DBF table. It should contain the column called CODE_18 containing the CLC class IDs. It should be named the same as",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/vnd.dbf"
@@ -54,16 +54,16 @@
     },
     "outputs": {
         "weight_table_csv": {
-            "title": "weight_table csv TITLE",
-            "description": "weight_table csv DESCRIPTION",
+            "title": "Density-based weight table as CSV",
+            "description": "Weights for each significant urban CLC class (CLC code >= 100 & < 200) based on mapping CORINE CLC to the EU 2021 Census Grid. Weights are calculated based on the percentage of average urban class-specicif human popupation density out of the sum of all urban class-specific human population densities. The percentage is an average of the percentage values from two different approaches, since the CLC raster is finer (100m2 cells) compared to the Census Grid (1km2 cells). The first approach is based on general overlaps: using all urban CLC raster cells overlapping Census Grid cells. The second appraoch is based on full overlaps: using only urban CLC raster cells that overlap Census Grid cells containing only one unique urban CLC class. Each census grid value is divided equally out on each used CLC raster cell within it. Urban CLC classes are perceived as significant and kept when final weights >= 1.0 %.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "text/csv"
             }
         },
         "weight_table_rds": {
-            "title": "weight_table rds TITLE",
-            "description": "weight_table rds DESCRIPTION",
+            "title": "Density-based weight table as RDS",
+            "description": "The same weight table as the CSV table but stored as RDS",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/x-rds"
