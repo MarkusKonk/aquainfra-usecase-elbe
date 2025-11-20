@@ -3,10 +3,10 @@
     "id": "process-interpolate-subbasins",
     "use_case": "Elbe",
     "title": {
-        "en": "process-interpolate-subbasins...TITLE"
+        "en": "Area-weighted interpolation of ancillary data to calculate human population in target regions"
     },
     "description": {
-        "en": "process-interpolate-subbasins...DESCRIPTION"
+        "en": "Area-weighted interpolation of ancillary data to calculate human population in target regions. The ancillary dataset should contain a polygon ID column called 'nuts_cor_int_id' and an estimated human population numeric column called 'estPopCor'. The target dataset should contain a polygon ID column called 'OBJECTID'."
     },
     "jobControlOptions": ["sync-execute", "async-execute"],
     "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
@@ -19,8 +19,8 @@
     }],
     "inputs": {
         "inputFile1_gpkg": {
-            "title": "inputFile1_gpkg TITLE",
-            "description": "inputFile1_gpkg DESCRIPTION",
+            "title": "Ancillary data: Significant urban CORINE CLC polygons with estimated human population",
+            "description": "Ancillary data for modelling human population finer, stored as geopackage, and cut to analysis extent, and consisting of significant urban CORINE CLC polygons with estimated human population calculated through dasymetric refinement of NUTS3 human population based on density-derived input weights calculated from overlapping CORINE CLC raster with Eurostat 2021 Census Grid. It should contain a polygon ID column called 'nuts_cor_int_id' and an estimated human population numeric column called 'estPopCor'. It should have same coordinate system as the river catchment input dataset.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/geopackage+sqlite3"
@@ -30,8 +30,8 @@
             "keywords": []
         },
         "inputFile2_gpkg": {
-            "title": "inputFile2_gpkg TITLE",
-            "description": "inputFile2_gpkg DESCRIPTION",
+            "title": "Validated target dataset",
+            "description": "Target dataset stored as geopackage with validated geometries. An example could be EU Ecrins river subcatchments from 2012. It should contain a polygon ID column called 'OBJECTID'. It should have the same coordinate system and extent as the inputted ancillary dataset.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/geopackage+sqlite3"
@@ -43,8 +43,8 @@
     },
     "outputs": {
         "subbasin_population_density": {
-            "title": "subbasin_population_density gpkg TITLE",
-            "description": "subbasin_population_density gpkg DESCRIPTION",
+            "title": "Target data with estimated annual human population.",
+            "description": "Target data (e.g. Ecrins 2012 river subcatchments) with estimated annual human population based on area-weighted ancillary data.",
             "schema": {
                 "type": "object",
                 "contentMediaType": "application/geopackage+sqlite3"
