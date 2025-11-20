@@ -3,10 +3,10 @@
     "id": "combine-eurostat-data",
     "use_case": "Elbe",
     "title": {
-        "en": "combine-eurostat-data...TITLE"
+        "en": "Attach human population statistics to EU NUTS3 regions."
     },
     "description": {
-        "en": "combine-eurostat-data...DESCRIPTION"
+        "en": "Attach latest EU human population statistics to EU NUTS3 regions using NUTS3 version of own choice."
     },
     "jobControlOptions": ["sync-execute", "async-execute"],
     "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
@@ -19,8 +19,8 @@
     }],
     "inputs": {
         "country_code": {
-            "title": "country_code TITLE",
-            "description": "country_code DESCRIPTION",
+            "title": "Country code",
+            "description": "Official country code as short text string for country in focus.",
             "schema": {
                 "type": "string",
                 "enum": [
@@ -33,8 +33,8 @@
             "keywords": []
         },
         "year": {
-            "title": "year TITLE",
-            "description": "year DESCRIPTION",
+            "title": "NUTS3 focus year",
+            "description": "Year for EU NUTS3 region version to be used and combined with the latest EU annual human population statistics available.",
             "schema": {
                 "type": "string",
                 "enum": [
@@ -54,8 +54,8 @@
     },
     "outputs": {
         "nuts3_pop_data": {
-            "title": "nuts3_pop_data gpkg TITLE",
-            "description": "nuts3_pop_data gpkg DESCRIPTION",
+            "title": "NUTS3 geopackage with latest EU annual human population",
+            "description": "NUTS3 geopackage for the inputted NUTS3 version with latest EU annual human population attached as attribute data",
             "schema": {
                 "contentMediaType": "application/geopackage+sqlite3"
             }
