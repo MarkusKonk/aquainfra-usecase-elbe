@@ -32,7 +32,7 @@
             "maxOccurs": 1,
             "keywords": []
         },
-        "year": {
+        "nuts_year": {
             "title": "NUTS3 version year",
             "description": "Year for EU NUTS3 region version to be used and combined with the latest EU annual human population statistics available.",
             "schema": {
@@ -46,6 +46,16 @@
                     "2021",
                     "2024"
                 ]
+            },
+            "minOccurs": 1,
+            "maxOccurs": 1,
+            "keywords": []
+        },
+        "pop_year": {
+            "title": "pop_year TITLE",
+            "description": "pop_year DESCRIPTION",
+            "schema": {
+                "type": "string"
             },
             "minOccurs": 1,
             "maxOccurs": 1,

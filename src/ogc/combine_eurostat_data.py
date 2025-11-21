@@ -58,13 +58,16 @@ class CombineEurostatDataProcessor(BaseProcessor):
 
         # User inputs
         in_country_code = data.get('country_code')
-        in_year = data.get('year')
+        in_nuts_year = data.get('nuts_year')
+        in_pop_year = data.get('pop_year')
 
         # Check user inputs
         if in_country_code is None:
             raise ProcessorExecuteError('Missing parameter "inputFile_tif". Please provide a inputFile_tif.')
-        if in_year is None:
-            raise ProcessorExecuteError('Missing parameter "year". Please provide a year.')
+        if in_nuts_year is None:
+            raise ProcessorExecuteError('Missing parameter "nuts_year". Please provide a nuts_year.')
+        if in_pop_year is None:
+            raise ProcessorExecuteError('Missing parameter "pop_year". Please provide a pop_year.')
 
         # Where to store output data
         downloadfilename = 'nuts3_pop_data-%s.gpkg' % self.my_job_id
@@ -72,7 +75,7 @@ class CombineEurostatDataProcessor(BaseProcessor):
         downloadlink     = f'{output_url}/{downloadfilename}'
 
         # Assemble args for script:
-        script_args = [in_country_code, in_year, downloadfilepath]
+        script_args = [in_country_code, in_nuts_year, in_pop_year, downloadfilepath]
 
         # Run docker container:
         returncode, stdout, stderr, user_err_msg = docker_utils.run_docker_container(

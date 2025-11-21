@@ -1,127 +1,231 @@
 #!/usr/bin/env Rscript
 
-################################################################################
-# MODULE: Combine NUTS and Eurostat Population Data
-#
-# Fetches NUTS3 boundary data and Eurostat demographic data, automatically
-# detects the latest available population year, filters the data, and merges
-# population counts with the NUTS geometries for a specified country.
-################################################################################
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(sf)
+  library(eurostat)
+  library(giscoR)
+})
 
-library(dplyr)
-library(eurostat)
-library(giscoR)
-library(sf)
-
-options(scipen = 100, digits = 4)
-
-#' Combine NUTS3 Geometries with Eurostat Population Data
-#' 
-#' Filters NUTS3 geometries and Eurostat population table to a specific country 
-#' and performs a spatial merge based on the NUTS ID.
+# ------------------------------------------------------------------------------
+# Main function (single exported function)
+# ------------------------------------------------------------------------------
+#' Combine Eurostat population table with GISCO NUTS3 geometries
 #'
-#' @param nuts3_all_sf sf object: All NUTS3 geometries (e.g., fetched from giscoR).
-#' @param poptable_df data.frame: Filtered Eurostat population table containing 'geo' (NUTS_ID) and the 'POP_YYYY' column.
-#' @param country_code character: The 2-letter country code (e.g., "DE").
-#' @return sf object: NUTS3 geometries for the target country with the latest population data attached.
-combine_eurostat_data <- function(nuts3_all_sf, poptable_df, country_code = "DE") {
-  message(paste("Filtering and combining Eurostat data for country:", country_code))
+#' @param country_code      Character, e.g. "DE"
+#' @param nuts_year         Integer, NUTS version year (2013, 2016, 2021, 2024)
+#' @param pop_year          Integer, population reference year
+#' @param output_gpkg_path  Character, path to output GPKG file
+#'
+#' The function enforces valid combinations of NUTS year and population year:
+#'   - NUTS 2013 -> POP 2014–2017
+#'   - NUTS 2016 -> POP 2018–2020
+#'   - NUTS 2021 -> POP 2021–2023
+#'   - NUTS 2024 -> POP 2024–2030
+#'
+#' Output layer will contain a column "POP_<pop_year>" with population counts.
+#'
+combine_eurostat_data <- function(country_code,
+                                  nuts_year,
+                                  pop_year,
+                                  output_gpkg_path) {
   
-  # Filter NUTS3 geometries for the target country
-  nuts3_country <- nuts3_all_sf %>%
+  message(sprintf(
+    "D2K Wrapper Started for country: %s | NUTS: %s | Pop: %s",
+    country_code, nuts_year, pop_year
+  ))
+  
+  # --------------------------------------------------------------------------
+  # 1. Validate and normalize inputs
+  # --------------------------------------------------------------------------
+  country_code <- toupper(country_code)
+  if (!is.character(country_code) || nchar(country_code) != 2) {
+    stop("country_code must be a 2-letter ISO country code (e.g. 'DE').")
+  }
+  
+  if (!is.numeric(nuts_year) || !is.numeric(pop_year)) {
+    stop("nuts_year and pop_year must be numeric (e.g. 2016, 2018).")
+  }
+  
+  nuts_year <- as.integer(nuts_year)
+  pop_year  <- as.integer(pop_year)
+  
+  # --------------------------------------------------------------------------
+  # 2. Enforce allowed NUTS / POP year combinations
+  # --------------------------------------------------------------------------
+  # Valid year ranges:
+  # - NUTS 2013 -> POP 2014–2017
+  # - NUTS 2016 -> POP 2018–2020
+  # - NUTS 2021 -> POP 2021–2023
+  # - NUTS 2024 -> POP 2024–2030
+  valid <- (
+    (nuts_year == 2013 && pop_year >= 2014 && pop_year <= 2017) ||
+      (nuts_year == 2016 && pop_year >= 2018 && pop_year <= 2020) ||
+      (nuts_year == 2021 && pop_year >= 2021 && pop_year <= 2023) ||
+      (nuts_year == 2024 && pop_year >= 2024 && pop_year <= 2030)
+  )
+  
+  if (!valid) {
+    msg <- paste0(
+      "\n--- Valid Configurations ---\n",
+      "NUTS 2013 -> Pop 2014-2017\n",
+      "NUTS 2016 -> Pop 2018-2020\n",
+      "NUTS 2021 -> Pop 2021-2023\n",
+      "NUTS 2024 -> Pop 2024-2030\n",
+      "----------------------------\n\n",
+      "Requested: NUTS ", nuts_year, " with Pop ", pop_year,
+      " is not supported.\n"
+    )
+    stop(msg)
+  }
+  
+  # --------------------------------------------------------------------------
+  # 3. Download NUTS3 geometries from GISCO (giscoR)
+  # --------------------------------------------------------------------------
+  message(sprintf(
+    "Fetching NUTS3 boundaries (Year %s) from giscoR...",
+    nuts_year
+  ))
+  
+  nuts3_all <- giscoR::gisco_get_nuts(
+    year         = nuts_year,
+    nuts_level   = 3,
+    resolution   = "01",
+    cache        = TRUE,
+    update_cache = FALSE,
+    epsg         = "3035"     # ETRS89 / LAEA Europe (matches rest of workflow)
+  )
+  
+  # Filter to requested country
+  nuts3_country <- nuts3_all %>%
     dplyr::filter(CNTR_CODE == country_code)
   
-  # Filter population table based on NUTS IDs starting with the country code
-  country_pattern <- paste0("^", country_code)
-  poptable_country <- poptable_df[grep(country_pattern, poptable_df$geo), ]
-  
-  # Merge NUTS geometries with population data
-  nuts3pop_country <- merge(nuts3_country, poptable_country, 
-                            by.x = "NUTS_ID", by.y = "geo", 
-                            all.x = FALSE, all.y = FALSE)
-  
-  message("Eurostat data combination complete.")
-  return(nuts3pop_country)
-}
-
-################################################################################
-# D2K WRAPPER
-################################################################################
-
-args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 3) {
-  stop("Usage: Rscript src/combine_eurostat_data.R <country_code> <output_gpkg_path>", call. = FALSE)
-}
-
-param_country_code <- args[1]
-param_year <- args[2]
-output_path        <- args[3]
-
-message(paste(
-  "D2K Wrapper Started for country:", param_country_code,
-  "and year:", param_year
-))
-message(paste("Output will be saved to:", output_path))
-
-tryCatch({
-  message("Fetching NUTS3 boundaries from giscoR...")
-  # Fetches NUTS3 data for the latest available year (2021) in EPSG 3035 projection
-  nuts3_all <- giscoR::gisco_get_nuts(
-    year = param_year,
-    epsg = "3035",
-    resolution = "01",
-    spatialtype = "RG",
-    nuts_level = "3"
-  )
-  
-  # (FIX) Changed "demo_r_pjanaggr3" to "demo_r_pjangrp3"
-  message("Fetching Eurostat population table (demo_r_pjangrp3)...") 
-  
-  # Fetch data using the new, correct Eurostat table ID
-  poptable <- eurostat::get_eurostat("demo_r_pjangrp3",
-                                     time_format = "num",
-                                     cache = FALSE)
-  
-  names(poptable) <- tolower(names(poptable))
-  if (!"time" %in% names(poptable) && "time_period" %in% names(poptable)) {
-    poptable <- poptable %>% rename(time = time_period)
+  if (nrow(nuts3_country) == 0) {
+    stop(
+      "No NUTS3 polygons found for country_code = '",
+      country_code, "' and nuts_year = ", nuts_year, "."
+    )
   }
   
-  # Clean up sex and age categories for filtering
-  poptable <- poptable %>%
-    mutate(
-      sex = ifelse(sex %in% c("T", "Total", "TOTAL"), "T", sex),
-      age = ifelse(age %in% c("TOTAL", "Total", "TOTAL_AGE"), "TOTAL", age)
+  # --------------------------------------------------------------------------
+  # 4. Download Eurostat population table demo_r_pjangrp3
+  # --------------------------------------------------------------------------
+  message("Fetching Eurostat population table (demo_r_pjangrp3)...")
+  
+  poptable <- eurostat::get_eurostat("demo_r_pjangrp3",
+                                     time_format = "date")
+  
+  # TIME_PERIOD in this dataset is stored as Date (e.g. "2018-01-01")
+  pop_date <- as.Date(sprintf("%d-01-01", pop_year))
+  
+  # Filter to:
+  #  - requested year
+  #  - NUTS3 level codes (length 5)
+  #  - total sex (T) and total age (TOTAL)
+  message(sprintf("Filtering for population year: %d", pop_year))
+  
+  poptable_filtered <- poptable %>%
+    dplyr::filter(
+      TIME_PERIOD == pop_date,
+      nchar(geo) == 5,
+      sex == "T",
+      age == "TOTAL"
     )
   
-  # Find and use latest year for population data
-  latest_year <- max(poptable$time, na.rm = TRUE)
-  message(paste("Latest population year found:", latest_year))
+  # Filter to requested country (geo codes start with the country code)
+  poptable_country <- poptable_filtered[grep(
+    paste0("^", country_code),
+    poptable_filtered$geo
+  ), ]
   
-  # Filter for the latest year, total population, total age, and NUTS3 level (nchar(geo) == 5)
-  poptable_latest <- poptable %>%
-    filter(time == latest_year, sex == "T", age == "TOTAL", nchar(geo) == 5) %>%
-    select(geo, values)
-  
-  if (nrow(poptable_latest) == 0) {
-    stop(paste("Filtering Eurostat data for year", latest_year, "resulted in 0 rows."))
+  if (nrow(poptable_country) == 0) {
+    stop(
+      "No Eurostat population records found for country_code = '",
+      country_code, "', pop_year = ", pop_year, "."
+    )
   }
   
-  # Rename 'values' to the dynamic, latest year column name (e.g., POP_2024)
-  pop_col_name <- paste0("POP_", latest_year)
-  names(poptable_latest)[names(poptable_latest) == "values"] <- pop_col_name
+  # --------------------------------------------------------------------------
+  # 5. Combine NUTS3 geometries with population table
+  # --------------------------------------------------------------------------
+  message(sprintf(
+    "Filtering and combining Eurostat data for country: %s",
+    country_code
+  ))
   
+  # Join on NUTS id
+  nuts3_pop <- nuts3_country %>%
+    dplyr::left_join(
+      poptable_country,
+      by = c("NUTS_ID" = "geo")
+    )
   
-  nuts3_pop_data_sf <- combine_eurostat_data(
-    nuts3_all_sf = nuts3_all,
-    poptable_df = poptable_latest,
-    country_code = param_country_code
+  # Rename 'values' column to a year-specific population column
+  pop_col_name <- paste0("POP_", pop_year)
+  
+  if (!"values" %in% names(nuts3_pop)) {
+    stop("Joined dataset does not contain a 'values' column from Eurostat.")
+  }
+  
+  names(nuts3_pop)[names(nuts3_pop) == "values"] <- pop_col_name
+  
+  # Optional: ensure numeric
+  nuts3_pop[[pop_col_name]] <- as.numeric(nuts3_pop[[pop_col_name]])
+  
+  # --------------------------------------------------------------------------
+  # 6. Write output as GeoPackage
+  # --------------------------------------------------------------------------
+  dir.create(dirname(output_gpkg_path), showWarnings = FALSE, recursive = TRUE)
+  
+  sf::st_write(
+    nuts3_pop,
+    dsn    = output_gpkg_path,
+    layer  = "nuts3_pop",
+    driver = "GPKG",
+    delete_dsn = TRUE
   )
   
-  sf::st_write(nuts3_pop_data_sf, output_path, delete_layer = TRUE, quiet = TRUE)
+  message(
+    sprintf(
+      "D2K Wrapper Finished. NUTS3 population data saved to %s",
+      output_gpkg_path
+    )
+  )
   
-  message(paste("D2K Wrapper Finished. NUTS3 population data saved to", output_path))
+  invisible(output_gpkg_path)
+}
+
+# ------------------------------------------------------------------------------
+# CLI wrapper (kept very simple for OGC/docker)
+# ------------------------------------------------------------------------------
+if (identical(environment(), globalenv())) {
+  args <- commandArgs(trailingOnly = TRUE)
   
-}, error = function(e) {
-  stop(paste("Error during script execution:", e$message))
-})
+  if (length(args) != 4) {
+    cat(
+      "Error: Usage: Rscript src/combine_eurostat_data.R",
+      "<country_code> <nuts_year> <pop_year> <output_gpkg_path>\n"
+    )
+    quit(status = 1)
+  }
+  
+  country_code     <- args[1]
+  nuts_year        <- as.integer(args[2])
+  pop_year         <- as.integer(args[3])
+  output_gpkg_path <- args[4]
+  
+  tryCatch(
+    {
+      combine_eurostat_data(
+        country_code     = country_code,
+        nuts_year        = nuts_year,
+        pop_year         = pop_year,
+        output_gpkg_path = output_gpkg_path
+      )
+    },
+    error = function(e) {
+      message("Error during script execution: ", e$message)
+      quit(status = 1)
+    }
+  )
+}

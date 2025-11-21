@@ -42,7 +42,7 @@ docker build -t aquainfra-elbe-usecase-image .
 ### Step 1: Fetch NUTS and Eurostat Data
 
 ```bash
-docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R aquainfra-elbe-usecase-image "DE" "2021" "/out/nuts3_pop_data.gpkg"
+docker run -it --rm -v ./out:/out -e R_SCRIPT=combine_eurostat_data.R aquainfra-elbe-usecase-image "DE" 2016 2018 "/out/nuts3_pop_data.gpkg"
 ```
 
 ---
@@ -122,7 +122,7 @@ mkdir out
 ### Step 1: Fetch NUTS and Eurostat Data
 
 ```bash
-Rscript combine_eurostat_data.R "DE" "out/nuts3_pop_data.gpkg"
+Rscript combine_eurostat_data.R "DE" 2016 2018 "out/nuts3_pop_data.gpkg"
 ```
 
 ---
