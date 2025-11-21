@@ -5,7 +5,7 @@
     "title": {
         "en": "Visualising final outputs of dasymetric refinement process."
     },
-    "description"{
+    "description":{
         "en": "Visualising final urban significant CLC-class specific dasymetric refinement input weights in table (output 1), error map of dasymetric refinement process at LAU (Local Areal Unit) level (output 2), and estimated human population density for target zones (output 3)."
     },
     "jobControlOptions": ["sync-execute", "async-execute"],
