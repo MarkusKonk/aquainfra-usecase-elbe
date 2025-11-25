@@ -6,10 +6,10 @@
         "en": "Attach human population statistics to EU NUTS3 regions."
     },
     "description": {
-        "en": "Attach latest EU human population statistics to EU NUTS3 regions using NUTS3 version of own choice."
+        "en": "Attach EU human population statistics for chosen year to EU NUTS3 regions using temporally matching NUTS3 version."
     },
     "jobControlOptions": ["sync-execute", "async-execute"],
-    "keywords": ["elbe use case", "AquaINFRA", "keyword 3", "keyword 4"],
+    "keywords": ["elbe use case", "AquaINFRA", "eurostat", "human population"],
     "links": [{
         "type": "text/html",
         "rel": "about",
@@ -34,7 +34,7 @@
         },
         "nuts_year": {
             "title": "NUTS3 version year",
-            "description": "Year for EU NUTS3 region version to be used and combined with the latest EU annual human population statistics available.",
+            "description": "Year for EU NUTS3 region version to be used and combined with the chosen year EU annual human population statistics. The NUTS3 region version is only valid with temporally close human population year combinations.",
             "schema": {
                 "type": "string",
                 "enum": [
@@ -52,8 +52,8 @@
             "keywords": []
         },
         "pop_year": {
-            "title": "pop_year TITLE",
-            "description": "pop_year DESCRIPTION",
+            "title": "human population year",
+            "description": "Chosen human population year (HPY) for statistics. If you selected NUTS3 version (NV) 2013, select HPY >= 2014 & <= 2017. If NV 2016, select HPY >= 2018 & <= 2020. If NV 2021, select HPY >= 2021 & <= 2023. If NV 2024, select HPY >= 2024 & <= 2030.",
             "schema": {
                 "type": "string"
             },
