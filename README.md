@@ -103,6 +103,142 @@ docker run -it --rm -v ./out:/out -e R_SCRIPT=process_create_visualizations.R aq
 
 ---
 
+## Run the workflow with cURL commands
+
+### Step 1: Fetch NUTS and Eurostat Data
+
+```bash
+curl --location 'http://localhost:5000/processes/combine-eurostat-data/execution' \
+--header 'Prefer: respond-async;return=representation' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "country_code": "DE",
+        "nuts_year": "2016",
+        "pop_year": "2018"
+    }
+}'
+```
+
+---
+
+### Step 2: Calculate Population Weights
+
+```bash
+curl --location 'http://localhost:5000/processes/weighting-functions/execution' \
+--header 'Prefer: respond-async;' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_tif": "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif",
+        "inputFile2_gpkg": "https://aquainfra-aau.a3s.fi/elbe/censusDE_catchSE.gpkg",
+        "inputFile3_dbf": "https://aquainfra-aau.a3s.fi/elbe/cor2018DE_catchSE.tif.vat.dbf"
+    }
+}'
+```
+
+---
+
+### Step 3: Clean Catchment Geometries
+
+```bash
+curl --location 'http://localhost:5000/processes/clean-catchment-geometry/execution' \
+--header 'Prefer: respond-async' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_gpkg": "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg"
+    }
+}'
+```
+
+---
+
+### Step 4: Filter and Clip All Data to Analysis Extent
+
+```bash
+curl --location 'http://localhost:5000/processes/filter-clip-clean-extent/execution' \
+--header 'Prefer: respond-async;return=representation' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/nuts3_pop_data.gpkg",
+        "inputFile2_gpkg": "https://aquainfra-aau.a3s.fi/elbe/LAUpop2018DE.gpkg",
+        "inputFile3_gpkg": "https://aquainfra-aau.a3s.fi/elbe/catchsub_ecrins_northsea_elbeSE.gpkg"
+    }
+}'
+```
+
+---
+
+### Step 5: Perform Dasymetric Refinement (Core Step)
+
+```bash
+curl --location 'http://localhost:5000/processes/process-dasymetric-refinement/execution' \
+--header 'Prefer: respond-async;return=representation' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/nuts3_filtered.gpkg",
+        "inputFile2_rds": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/weight_table.rds",
+        "inputFile3_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/analysis_extent.gpkg",
+        "inputFile4_gpkg": "https://aquainfra-aau.a3s.fi/elbe/corDE_nutsSE.gpkg"
+    }
+}'
+```
+
+---
+
+### Step 6: Interpolate Population to LAU
+
+```bash
+curl --location 'http://localhost:5000/processes/process-interpolate-lau/execution' \
+--header 'Prefer: respond-async;return=representation' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/ancillary_data.gpkg",
+        "inputFile2_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/lau_processed.gpkg"
+    }
+}'
+```
+
+---
+
+### Step 7: Interpolate Population to Subbasins
+
+```bash
+curl --location 'http://localhost:5000/processes/process-interpolate-subbasins/execution' \
+--header 'Prefer: respond-async;return=representation' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/ancillary_data.gpkg",
+        "inputFile2_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/catchment_cleaned.gpkg"
+    }
+}'
+```
+
+---
+
+### Step 8: Create Final Visualizations
+
+```bash
+curl --location 'http://localhost:5000/processes/process_create-visualizations/execution' \
+--header 'Prefer: respond-async;return=representation' \
+--header 'Content-Type: application/json' \
+--data '{
+    "inputs": {
+        "inputFile1_rds": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/weight_table.rds",
+        "inputFile2_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/lau_population_errors.gpkg",
+        "inputFile3_gpkg": "https://raw.githubusercontent.com/MarkusKonk/aquainfra-usecase-elbe/refs/heads/main/example_out/subbasin_population_density.gpkg"
+    }
+}'
+```
+
+---
+
+
 ## Run the Workflow with MyBinder (or locally)
 
 Visit [https://mybinder.org/v2/gh/MarkusKonk/aquainfra-usecase-elbe/HEAD](https://mybinder.org/v2/gh/MarkusKonk/aquainfra-usecase-elbe/HEAD).
